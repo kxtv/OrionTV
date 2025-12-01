@@ -266,6 +266,7 @@ const useHomeStore = create<HomeState>((set, get) => ({
       } else if (err.message.includes("403")) {
         errorMessage = "访问被拒绝，请检查权限设置";
       }
+      errorMessage+=","+err.message
 
       set({ error: errorMessage });
     } finally {

@@ -34,7 +34,7 @@ const useAuthStore = create<AuthState>((set) => ({
       // If server config is loading, wait a bit for it to complete
       if (settingsState.isLoadingServerConfig) {
         // Wait up to 3 seconds for server config to load
-        const maxWaitTime = 3000;
+        const maxWaitTime = 30000; // 3s -> 30s
         const checkInterval = 100;
         let waitTime = 0;
         

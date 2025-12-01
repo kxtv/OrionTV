@@ -98,7 +98,7 @@ export class API {
     }
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! fetch ${url} status: ${response.status}`);
     }
 
     return response;
