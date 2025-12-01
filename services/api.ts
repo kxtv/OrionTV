@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Toast from "react-native-toast-message";
 
 // region: --- Interface Definitions ---
 export interface DoubanItem {
@@ -75,6 +76,8 @@ export interface ServerConfig {
   StorageType: "localstorage" | "redis" | string;
 }
 
+export let appStartTime = Date.now();
+
 export class API {
   public baseURL: string = "";
 
@@ -90,17 +93,44 @@ export class API {
 
   private async _fetch(url: string, options: RequestInit = {}): Promise<Response> {
     if (!this.baseURL) {
+      Toast.show({ type: "error", text1: `没有配置 API`});
       throw new Error("API_URL_NOT_SET");
     }
 
-    const response = await fetch(`${this.baseURL}${url}`, options);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {controller.abort();}, 60000); // 60 seconds
+
+    const startTime = Date.now();
+
+    if (startTime - appStartTime <= 10 * 1000) {  // 前 10 秒才打印
+        Toast.show({ type: "info", text1: `start ${url}` ,visibilityTime:1000});
+    }
+
+    let response: Response;
+    try {
+      response = await fetch(`${this.baseURL}${url}`, {...options,signal: controller.signal});
+      clearTimeout(timeoutId);
+    } catch (error) {
+      clearTimeout(timeoutId);
+      const cost = Date.now() - startTime;
+      Toast.show({ type: "error", text1: `fetch ${url} error`, text2: `cost=${cost}ms,${error}` });
+      throw error;
+    }
+
+    const cost = Date.now() - startTime;
+
+    if (!response.ok) {
+      Toast.show({ type: "error", text1: `${url}`,text2:`status=${response.status}, cost=${cost}ms`});
+    }else if ( cost >= 10 * 1000 ){ // 耗时较长时打印
+      Toast.show({ type: "success", text1: `${url}`,text2:`status=${response.status}, cost=${cost}ms`});
+    }
 
     if (response.status === 401) {
-      throw new Error("UNAUTHORIZED");
+      throw new Error(`UNAUTHORIZED`);
     }
 
     if (!response.ok) {
-      throw new Error(`HTTP error! fetch ${url} status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     return response;
@@ -131,7 +161,7 @@ export class API {
   }
 
   async getServerConfig(): Promise<ServerConfig> {
-    const response = await this._fetch("/api/server-config");
+    const response = await this._fetch(`/api/server-config?_t=${Date.now()}`);
     return response.json();
   }
 

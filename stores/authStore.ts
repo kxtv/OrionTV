@@ -26,6 +26,7 @@ const useAuthStore = create<AuthState>((set) => ({
       set({ isLoggedIn: false, isLoginModalVisible: false });
       return;
     }
+
     try {
       // Wait for server config to be loaded if it's currently loading
       const settingsState = useSettingsStore.getState();
@@ -34,10 +35,10 @@ const useAuthStore = create<AuthState>((set) => ({
       // If server config is loading, wait a bit for it to complete
       if (settingsState.isLoadingServerConfig) {
         // Wait up to 3 seconds for server config to load
-        const maxWaitTime = 30000; // 3s -> 30s
-        const checkInterval = 100;
+        const maxWaitTime = 5000;// 3000 -> 5000
+        let checkInterval = 100;
         let waitTime = 0;
-
+        let tryTotal =0
         while (waitTime < maxWaitTime) {
           await new Promise(resolve => setTimeout(resolve, checkInterval));
           waitTime += checkInterval;
@@ -46,13 +47,17 @@ const useAuthStore = create<AuthState>((set) => ({
             serverConfig = currentState.serverConfig;
             break;
           }
+          if ( tryTotal % 15 == 0 ){
+            Toast.show({ type: "error", text1: `继续等待 Config, try=${tryTotal}, wait=${waitTime}` ,visibilityTime:500});
+          }
+          tryTotal++
         }
       }
 
       if (!serverConfig?.StorageType) {
         // Only show error if we're not loading and have tried to fetch the config
         if (!settingsState.isLoadingServerConfig) {
-          Toast.show({ type: "error", text1: "请检查网络或者服务器地址是否可用" });
+          Toast.show({ type: "error", text1: "请检查网络或者服务器地址是否可用" ,text2:`cfg=${JSON.stringify(serverConfig)}`});
         }
         return;
       }
@@ -74,7 +79,7 @@ const useAuthStore = create<AuthState>((set) => ({
       }
     } catch (error) {
       logger.error("Failed to check login status:", error);
-      if (error instanceof Error && error.message === "UNAUTHORIZED") {
+      if (error instanceof Error && error.message.includes("UNAUTHORIZED")) {
         set({ isLoggedIn: false, isLoginModalVisible: true });
       } else {
         set({ isLoggedIn: false });

@@ -54,11 +54,10 @@ export const useApiConfig = () => {
             case 'API_URL_NOT_SET':
               errorMessage = 'API地址未设置';
               break;
-            case 'UNAUTHORIZED':
-              errorMessage = '服务器认证失败';
-              break;
             default:
-              if (error.message.includes('Network')) {
+              if (error.message.includes('UNAUTHORIZED')) {
+                errorMessage = '服务器认证失败';
+              } else if (error.message.includes('Network')) {
                 errorMessage = '网络连接失败，请检查网络或服务器地址';
               } else if (error.message.includes('timeout')) {
                 errorMessage = '连接超时，请检查服务器地址';
@@ -69,6 +68,7 @@ export const useApiConfig = () => {
               }
               break;
           }
+          errorMessage+=","+error.message
         }
 
         setValidationState({

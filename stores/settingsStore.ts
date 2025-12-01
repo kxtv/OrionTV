@@ -3,6 +3,7 @@ import { SettingsManager } from "@/services/storage";
 import { api, ServerConfig } from "@/services/api";
 import { storageConfig } from "@/services/storageConfig";
 import Logger from "@/utils/Logger";
+import Toast from "react-native-toast-message";
 
 const logger = Logger.withTag('SettingsStore');
 
@@ -54,8 +55,16 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       },
     });
     if (settings.apiBaseUrl) {
+      const startTime = Date.now();
       api.setBaseUrl(settings.apiBaseUrl);
       await get().fetchServerConfig();
+      const cost = Date.now() - startTime;
+      if ( cost >= 10 * 1000 ){
+         const cfg=get().serverConfig
+         Toast.show({ type: "info", text1:`finish loadSettings,cost=${cost}`,text2: `cfg=${JSON.stringify(cfg)}` });
+      }
+    }else{
+      Toast.show({ type: "error", text1: `缺少 apiBaseUrl` });
     }
   },
   fetchServerConfig: async () => {
@@ -69,6 +78,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     } catch (error) {
       set({ serverConfig: null });
       logger.error("Failed to fetch server config:", error);
+      Toast.show({ type: "error", text1: `fetch server config：${error}` });
     } finally {
       set({ isLoadingServerConfig: false });
     }

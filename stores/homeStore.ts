@@ -3,6 +3,7 @@ import { api, SearchResult, PlayRecord } from "@/services/api";
 import { PlayRecordManager } from "@/services/storage";
 import useAuthStore from "./authStore";
 import { useSettingsStore } from "./settingsStore";
+import Toast from "react-native-toast-message";
 
 export type RowItem = (SearchResult | PlayRecord) & {
   id: string;
@@ -148,7 +149,7 @@ const useHomeStore = create<HomeState>((set, get) => ({
       if (selectedCategory.type === "record") {
         const { isLoggedIn } = useAuthStore.getState();
         if (!isLoggedIn) {
-          set({ contentData: [], hasMore: false });
+          set({ contentData: [], hasMore: false});
           return;
         }
         const records = await PlayRecordManager.getAll();
@@ -250,11 +251,12 @@ const useHomeStore = create<HomeState>((set, get) => ({
       }
     } catch (err: any) {
       let errorMessage = "加载失败，请重试";
-
+      let needLogin=false
       if (err.message === "API_URL_NOT_SET") {
         errorMessage = "请点击右上角设置按钮，配置您的服务器地址";
-      } else if (err.message === "UNAUTHORIZED") {
+      } else if (err.message.includes( "UNAUTHORIZED") ){
         errorMessage = "认证失败，请重新登录";
+        needLogin = true
       } else if (err.message.includes("Network")) {
         errorMessage = "网络连接失败，请检查网络连接";
       } else if (err.message.includes("timeout")) {
@@ -269,6 +271,10 @@ const useHomeStore = create<HomeState>((set, get) => ({
       errorMessage+=","+err.message
 
       set({ error: errorMessage });
+
+      if (needLogin ){
+         useAuthStore.getState().showLoginModal();
+      }
     } finally {
       set({ loading: false, loadingMore: false });
     }
@@ -311,39 +317,39 @@ const useHomeStore = create<HomeState>((set, get) => ({
   },
 
   refreshPlayRecords: async () => {
-    const { apiBaseUrl } = useSettingsStore.getState();
-    await useAuthStore.getState().checkLoginStatus(apiBaseUrl);
-    const { isLoggedIn } = useAuthStore.getState();
-    if (!isLoggedIn) {
-      set((state) => {
-        const recordCategoryExists = state.categories.some((c) => c.type === "record");
-        if (recordCategoryExists) {
-          const newCategories = state.categories.filter((c) => c.type !== "record");
-          if (state.selectedCategory.type === "record") {
-            get().selectCategory(newCategories[0] || null);
-          }
-          return { categories: newCategories };
-        }
-        return {};
-      });
-      return;
-    }
-    const records = await PlayRecordManager.getAll();
-    const hasRecords = Object.keys(records).length > 0;
-    set((state) => {
-      const recordCategoryExists = state.categories.some((c) => c.type === "record");
-      if (hasRecords && !recordCategoryExists) {
-        return { categories: [initialCategories[0], ...state.categories] };
-      }
-      if (!hasRecords && recordCategoryExists) {
-        const newCategories = state.categories.filter((c) => c.type !== "record");
-        if (state.selectedCategory.type === "record") {
-          get().selectCategory(newCategories[0] || null);
-        }
-        return { categories: newCategories };
-      }
-      return {};
-    });
+    // const { apiBaseUrl } = useSettingsStore.getState();
+    // await useAuthStore.getState().checkLoginStatus(apiBaseUrl);
+    // const { isLoggedIn } = useAuthStore.getState();
+    // if (!isLoggedIn) {
+    //   set((state) => {
+    //     const recordCategoryExists = state.categories.some((c) => c.type === "record");
+    //     if (recordCategoryExists) {
+    //       const newCategories = state.categories.filter((c) => c.type !== "record");
+    //       if (state.selectedCategory.type === "record") {
+    //         get().selectCategory(newCategories[0] || null);
+    //       }
+    //       return { categories: newCategories };
+    //     }
+    //     return {};
+    //   });
+    //   return;
+    // }
+    // const records = await PlayRecordManager.getAll();
+    // const hasRecords = Object.keys(records).length > 0;
+    // set((state) => {
+    //   const recordCategoryExists = state.categories.some((c) => c.type === "record");
+    //   if (hasRecords && !recordCategoryExists) {
+    //     return { categories: [initialCategories[0], ...state.categories] };
+    //   }
+    //   if (!hasRecords && recordCategoryExists) {
+    //     const newCategories = state.categories.filter((c) => c.type !== "record");
+    //     if (state.selectedCategory.type === "record") {
+    //       get().selectCategory(newCategories[0] || null);
+    //     }
+    //     return { categories: newCategories };
+    //   }
+    //   return {};
+    // });
 
     get().fetchInitialData();
   },
