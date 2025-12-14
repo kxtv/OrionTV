@@ -233,7 +233,11 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
       set({ isLoading: false });
       
       const perfEnd = performance.now();
-      logger.info(`[PERF] PlayerStore.loadVideo ERROR - total time: ${(perfEnd - perfStart).toFixed(2)}ms`);
+      const cost = (perfEnd - perfStart).toFixed(2)
+      logger.info(`[PERF] PlayerStore.loadVideo ERROR - total time: ${cost}ms`);
+
+      const message = error instanceof Error ? error.message : String(error);
+      Toast.show({ type: "error", text1: `加载视频失败, cost=${cost}ms`,text2: message});
     }
   },
 
@@ -251,7 +255,8 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
         await videoRef?.current?.replayAsync();
       } catch (error) {
         logger.debug("Failed to replay video:", error);
-        Toast.show({ type: "error", text1: "播放失败" });
+        const message = error instanceof Error ? error.message : String(error);
+        Toast.show({ type: "error", text1: "播放失败",text2:message});
       }
     }
   },
@@ -267,7 +272,8 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
         }
       } catch (error) {
         logger.debug("Failed to toggle play/pause:", error);
-        Toast.show({ type: "error", text1: "操作失败" });
+        const message = error instanceof Error ? error.message : String(error);
+        Toast.show({ type: "error", text1: "操作失败" ,text2: message});
       }
     }
   },
@@ -281,7 +287,8 @@ const usePlayerStore = create<PlayerState>((set, get) => ({
       await videoRef?.current?.setPositionAsync(newPosition);
     } catch (error) {
       logger.debug("Failed to seek video:", error);
-      Toast.show({ type: "error", text1: "快进/快退失败" });
+      const message = error instanceof Error ? error.message : String(error);
+      Toast.show({ type: "error", text1: "快进/快退失败",text2: message});
     }
 
     set({
