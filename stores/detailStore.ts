@@ -61,17 +61,14 @@ const useDetailStore = create<DetailState>((set, get) => ({
       error: null,
       allSourcesLoaded: false,
       controller: newController,
+      failedSources: new Set(),
     });
-
-    useDetailStore.getState().clearFailedSource(); // 2026-01-06 add
 
     const { videoSource } = useSettingsStore.getState();
 
     const processAndSetResults = async (results: SearchResult[], merge = false) => {
       const resolutionStart = performance.now();
       logger.info(`[PERF] Resolution detection START - processing ${results.length} sources`);
-
-
 
       const resultsWithResolution = await Promise.all(
         results.map(async (searchResult) => {
