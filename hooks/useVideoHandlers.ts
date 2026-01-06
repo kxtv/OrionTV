@@ -77,7 +77,7 @@ export const useVideoHandlers = ({
       Toast.show({ 
         type: "error", 
         text1: "SSL证书错误，正在尝试其他播放源...",
-        text2: "请稍候"
+        text2: errorString
       });
       usePlayerStore.getState().handleVideoError('ssl', currentEpisode.url);
     } else if (isNetworkError) {
@@ -85,7 +85,7 @@ export const useVideoHandlers = ({
       Toast.show({ 
         type: "error", 
         text1: "网络连接失败，正在尝试其他播放源...",
-        text2: "请稍候"
+        text2: errorString
       });
       usePlayerStore.getState().handleVideoError('network', currentEpisode.url);
     } else {
@@ -93,7 +93,7 @@ export const useVideoHandlers = ({
       Toast.show({ 
         type: "error", 
         text1: "视频播放失败，正在尝试其他播放源...",
-        text2: "请稍候"
+        text2: errorString
       });
       usePlayerStore.getState().handleVideoError('other', currentEpisode.url);
     }
