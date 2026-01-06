@@ -26,6 +26,7 @@ interface DetailState {
   abort: () => void;
   toggleFavorite: () => Promise<void>;
   markSourceAsFailed: (source: string, reason: string) => void;
+  clearFailedSource:() => void; // 2026-01-06 add
   getNextAvailableSource: (currentSource: string, episodeIndex: number) => SearchResultWithResolution | null;
 }
 
@@ -62,12 +63,16 @@ const useDetailStore = create<DetailState>((set, get) => ({
       controller: newController,
     });
 
+    useDetailStore.getState().clearFailedSource(); // 2026-01-06 add
+
     const { videoSource } = useSettingsStore.getState();
 
     const processAndSetResults = async (results: SearchResult[], merge = false) => {
       const resolutionStart = performance.now();
       logger.info(`[PERF] Resolution detection START - processing ${results.length} sources`);
-      
+
+
+
       const resultsWithResolution = await Promise.all(
         results.map(async (searchResult) => {
           let resolution;
@@ -353,6 +358,10 @@ const useDetailStore = create<DetailState>((set, get) => ({
     logger.info(`[SOURCE_FAILED] Total failed sources: ${newFailedSources.size}`);
     
     set({ failedSources: newFailedSources });
+  },
+
+  clearFailedSource: () => {
+    set({ failedSources: new Set() });
   },
 
   getNextAvailableSource: (currentSource: string, episodeIndex: number) => {
