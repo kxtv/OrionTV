@@ -8,7 +8,7 @@ import Logger from '@/utils/Logger';
 const logger = Logger.withTag('SourceSelectionModal');
 
 export const SourceSelectionModal: React.FC = () => {
-  useDetailStore().clearFailedSource(); // 2026-01-06 add
+  // useDetailStore().clearFailedSource(); // 2026-01-06 add
 
   const { showSourceModal, setShowSourceModal, loadVideo, currentEpisodeIndex, status } = usePlayerStore();
   const { searchResults, detail, setDetail } = useDetailStore();
