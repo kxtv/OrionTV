@@ -30,7 +30,14 @@ export interface Category {
 const initialCategories: Category[] = [
   { title: "最近播放", type: "record" },
   { title: "热门剧集", type: "tv", tag: "热门" },
-  { title: "电视剧", type: "tv", tags: ["国产剧", "动画","纪录片","美剧", "英剧", "韩剧", "日剧", "港剧", "日本动画"] },
+  {
+    title: "电视剧",
+    type: "tv",
+    tags: [
+        "悬疑", "犯罪", "奇幻", "惊悚", "都市", "搞笑", "古装", "爱情", // bd opendata 分类
+        "国产剧", "动画","纪录片","美剧", "英剧", "韩剧", "日剧", "港剧", "日本动画", // db 分类
+    ]
+  },
   {
     title: "电影",
     type: "movie",
