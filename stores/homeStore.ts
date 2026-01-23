@@ -22,20 +22,22 @@ export type RowItem = (SearchResult | PlayRecord) & {
 
 export interface Category {
   title: string;
-  type?: "movie" | "tv" | "record";
+  type?: "movie" | "tv" | "record" | "show" | "docu" | "anime";
   tag?: string;
   tags?: string[];
 }
 
 const initialCategories: Category[] = [
   { title: "最近播放", type: "record" },
-  { title: "热门剧集", type: "tv", tag: "热门" },
+  // { title: "热门剧集", type: "tv", tag: "热门" },
   {
     title: "电视剧",
     type: "tv",
     tags: [
+        "热门",
         "悬疑", "犯罪", "奇幻", "惊悚", "都市", "搞笑", "古装", "爱情", // bd opendata 分类
         "国产剧", "动画","纪录片","美剧", "英剧", "韩剧", "日剧", "港剧", "日本动画", // db 分类
+        "综艺",
     ]
   },
   {
@@ -50,6 +52,7 @@ const initialCategories: Category[] = [
       "豆瓣高分",
       "冷门佳片",
       "华语",
+      "港台",
       "欧美",
       "韩国",
       "日本",
@@ -58,17 +61,37 @@ const initialCategories: Category[] = [
       "爱情",
       "悬疑",
       "恐怖",
+      "印度",
+      "泰国",
+      "英国",
+      "top250",
     ],
   },
-  { title: "综艺", type: "tv", tag: "综艺" },
-  { title: "豆瓣 Top250", type: "movie", tag: "top250" },
+  // { title: "综艺", type: "tv", tag: "综艺" },
+  // { title: "豆瓣 Top250", type: "movie", tag: "top250" },
+  {
+    title: "综艺",
+    type: "show",
+    tags: ["全部", "游戏", "竞技", "音乐", "励志", "搞笑", "喜剧", "运动", "社会", "益智", "生活", "犯罪",],
+  },
+  {
+    title: "动漫",
+    type: "anime",
+    tags: ["全部", "卡通", "动漫", "奇幻", "热血", "玄幻", "探险", "漫画", "战斗", "小说", "穿越", "魔幻",],
+  },
+  {
+    title: "纪录片",
+    type: "docu",
+    tags: ["全部", "美剧", "历史", "社会", "自然", "人文", "文化", "人物", "纪实", "美食", "探索", "传记",],
+  },
 ];
+// 2026-01-23 添加分类 show、anime、docu
 
 // 添加缓存项接口
 interface CacheItem {
   data: RowItem[];
   timestamp: number;
-  type: 'movie' | 'tv' | 'record';
+  type: 'movie' | 'tv' | 'record' | 'show' | 'docu' | 'anime';
   hasMore: boolean;
 }
 

@@ -231,7 +231,7 @@ export class API {
   }
 
   async getDoubanData(
-    type: "movie" | "tv",
+    type: "movie" | "tv" | 'show' | 'docu' | 'anime',
     tag: string,
     pageSize: number = 16,
     pageStart: number = 0
